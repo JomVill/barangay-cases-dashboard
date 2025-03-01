@@ -41,22 +41,7 @@ This project is built with:
 - Node.js (v16 or higher)
 - npm (v8 or higher)
 
-### Option 1: Quick Start with Executable (Recommended)
-
-#### Windows Users
-1. Download the latest release from the releases page
-2. Run the installer (`Barangay-Case-Management-Setup-x.x.x.exe`)
-3. Follow the installation wizard
-4. Launch the application from your desktop or start menu
-
-#### macOS Users
-1. Download the latest `.dmg` file from the releases page
-2. Open the `.dmg` file
-3. Drag the application to your Applications folder
-4. Open the application from your Applications folder or Launchpad
-   - Note: You may need to right-click and select "Open" the first time to bypass Gatekeeper
-
-### Option 2: Developer Installation
+### Developer Installation
 
 1. Install Node.js:
    - Windows: Download and run the installer from [nodejs.org](https://nodejs.org/)
@@ -81,7 +66,7 @@ This project is built with:
 
 ### Option 1: Using the Start Scripts (Recommended for Development)
 
-#### On macOS/Linux:
+#### On macOS:
 1. Open Terminal
 2. Navigate to the project directory
 3. Make the script executable (first time only):
@@ -93,18 +78,14 @@ This project is built with:
    ./start-app.sh
    ```
    
+   **Important Note**: Double-clicking `start-app.sh` in Finder will not work properly on macOS. You must run it from Terminal.
+
 #### On Windows:
 1. Navigate to the project folder in File Explorer
 2. Double-click on `start-app.bat`
    - Note: If you get a security warning, click "More info" and then "Run anyway"
 
-### Option 2: Using the macOS App Launcher
-
-1. Navigate to the project directory
-2. Double-click on the `Start Barangay CMS.app` file
-   - Note: You may need to right-click and select "Open" the first time
-
-### Option 3: Using npm Commands
+### Option 2: Using npm Commands
 
 1. Open Terminal/Command Prompt
 2. Navigate to the project directory
@@ -114,7 +95,7 @@ This project is built with:
    ```
 4. Open your browser and go to `http://localhost:3000`
 
-### Option 4: Using Electron (Desktop App Experience)
+### Option 3: Using Electron (Desktop App Experience)
 
 1. Open Terminal/Command Prompt
 2. Navigate to the project directory
@@ -146,6 +127,10 @@ This project is built with:
    - Run `npm install` to ensure all dependencies are installed
    - If using a specific Node version, try `nvm use 16` (if nvm is installed)
 
+5. **macOS script issues**
+   - If double-clicking `start-app.sh` doesn't work, always run it from Terminal
+   - If Terminal says "permission denied", run `chmod +x start-app.sh` first
+
 ## Building for Production
 
 1. Build the web application:
@@ -158,6 +143,16 @@ This project is built with:
    npm run electron:build
    ```
    This will create distributable packages in the `release` folder.
+
+## Future Releases
+
+In upcoming releases, we plan to provide:
+
+1. Standalone executable installers for Windows (.exe)
+2. macOS application bundles (.dmg)
+3. Linux packages (.AppImage)
+
+These will simplify installation for end-users who don't need to modify the source code.
 
 ## Usage
 
@@ -173,6 +168,5 @@ This project is proprietary software owned by AnIno Solutions and JomVill.
 ## Support
 
 For support, please contact:
-- Email: support@aninosolutions.com
-- Website: [www.aninosolutions.com](https://www.aninosolutions.com)
-- Developer: JomVill (jomvill@aninosolutions.com)
+- Email: jomarivillanueva83@gmail.com
+- Developer: JomVill
