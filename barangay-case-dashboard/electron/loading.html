@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading - Barangay Case Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+            overflow: hidden;
+        }
+        
+        .loading-container {
+            text-align: center;
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1a3a6e;
+        }
+        
+        p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            font-size: 14px;
+            color: #888;
+            margin-top: 20px;
+            min-height: 20px;
+        }
+        
+        /* Circular loader */
+        .loader {
+            margin: 0 auto;
+            width: 70px;
+            height: 70px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1a3a6e;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .database-status {
+            font-size: 13px;
+            color: #4a6d8c;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        .notification {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background-color: #e6f7e6;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .notification.error {
+            background-color: #fdecea;
+            color: #d32f2f;
+            border-left: 4px solid #d32f2f;
+        }
+        
+        .notification.warning {
+            background-color: #fff8e1;
+            color: #ff8f00;
+            border-left: 4px solid #ff8f00;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container" id="loadingContainer">
+        <img src="../assets/logo.png" alt="Barangay Logo" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2YwZjJmNSIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1zaXplPSIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzFhM2E2ZSI+QkNNUzwvdGV4dD48L3N2Zz4='">
+        <h1>Barangay Case Management System</h1>
+        <p>Initializing application...</p>
+        
+        <!-- Circular loader -->
+        <div class="loader"></div>
+        
+        <div class="status" id="status">Preparing resources...</div>
+        <div class="database-status" id="databaseStatus"></div>
+        <div class="notification" id="notification"></div>
+    </div>
+
+    <script>
+        // Array of loading messages
+        const loadingMessages = [
+            "Preparing resources...",
+            "Loading case database...",
+            "Initializing dashboard...",
+            "Connecting to storage...",
+            "Verifying data integrity...",
+            "Almost ready..."
+        ];
+        
+        // Function to update status message
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        // Function to update database status
+        function updateDatabaseStatus(text) {
+            document.getElementById('databaseStatus').textContent = text;
+        }
+        
+        // Function to show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+        }
+        
+        // Variables to track loading state
+        let minLoadingTimeElapsed = false;
+        let databaseReady = false;
+        let caseCount = 0;
+        let databaseVerified = false;
+        let databaseError = null;
+        
+        // Function to check if we can close the loading screen
+        function checkReadyToClose() {
+            if (minLoadingTimeElapsed && databaseReady && databaseVerified) {
+                updateStatus("Ready! Launching application...");
+                
+                // Show appropriate notification based on database status
+                if (databaseError) {
+                    showNotification(`Warning: ${databaseError}. Starting with empty database.`, 'warning');
+                } else if (caseCount === 0) {
+                    showNotification('Database initialized successfully. No existing cases found.', 'success');
+                } else {
+                    showNotification(`Database loaded successfully with ${caseCount} cases!`, 'success');
+                }
+                
+                // Add fade-out animation after showing notification for 2 seconds
+                setTimeout(() => {
+                    document.getElementById('loadingContainer').classList.add('fade-out');
+                    
+                    // Notify main process that we're ready to close after fade-out completes
+                    setTimeout(() => {
+                        if (window.loadingAPI) {
+                            window.loadingAPI.readyToClose();
+                        } else {
+                            // Fallback if API not available
+                            window.location.href = '../dist/index.html#/';
+                        }
+                    }, 800);
+                }, 2000);
+            }
+        }
+        
+        // Function to handle database ready event
+        function handleDatabaseReady(data) {
+            console.log('Database is ready:', data);
+            databaseReady = true;
+            caseCount = data.count;
+            databaseError = data.error;
+            
+            if (databaseError) {
+                updateDatabaseStatus(`Database issue detected: ${databaseError}`);
+            } else if (caseCount === 0) {
+                updateDatabaseStatus('Database initialized with no cases');
+            } else {
+                updateDatabaseStatus(`Database connected: ${caseCount} cases loaded`);
+            }
+            
+            // Verify database is from Electron
+            verifyElectronDatabase();
+        }
+        
+        // Function to verify the database is from Electron
+        async function verifyElectronDatabase() {
+            if (!window.loadingAPI) {
+                console.warn('loadingAPI not available, cannot verify database');
+                databaseVerified = true;
+                checkReadyToClose();
+                return;
+            }
+            
+            try {
+                // Get database status from main process
+                const status = await window.loadingAPI.getDatabaseStatus();
+                console.log('Database verification status:', status);
+                
+                if (status.ready) {
+                    databaseVerified = true;
+                    
+                    // Update error status if present
+                    if (status.error && !databaseError) {
+                        databaseError = status.error;
+                        updateDatabaseStatus(`Database issue detected: ${databaseError}`);
+                    }
+                    
+                    // Ensure case count is consistent
+                    if (caseCount !== status.caseCount) {
+                        console.warn(`Case count mismatch: ${caseCount} vs ${status.caseCount}`);
+                        caseCount = status.caseCount;
+                    }
+                } else {
+                    console.warn('Database not ready during verification');
+                    updateDatabaseStatus('Waiting for database verification...');
+                    
+                    // Try again in 1 second
+                    setTimeout(verifyElectronDatabase, 1000);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error verifying database:', error);
+                updateDatabaseStatus('Database verification error');
+                databaseError = 'Verification failed: ' + error.message;
+                
+                // Consider it verified anyway to prevent hanging
+                databaseVerified = true;
+            }
+            
+            checkReadyToClose();
+        }
+        
+        // Function to simulate loading with minimum duration of 5 seconds
+        // but also ensuring database is loaded
+        function simulateLoading() {
+            let currentMessage = 0;
+            const loadingInterval = setInterval(() => {
+                updateStatus(loadingMessages[currentMessage]);
+                currentMessage = (currentMessage + 1) % loadingMessages.length;
+            }, 800);
+            
+            // Minimum loading time (5 seconds)
+            const minLoadingTime = 5000;
+            
+            // Check if minimum time has elapsed
+            setTimeout(() => {
+                minLoadingTimeElapsed = true;
+                checkReadyToClose();
+            }, minLoadingTime);
+            
+            // If we've been waiting too long (over 15 seconds), force proceed
+            setTimeout(() => {
+                if (!databaseReady || !databaseVerified) {
+                    console.log('Database taking too long, proceeding anyway');
+                    databaseReady = true;
+                    databaseVerified = true;
+                    databaseError = 'Database connection timeout';
+                    updateDatabaseStatus('Database timeout - proceeding anyway');
+                    showNotification('Warning: Database connection timed out. Starting with empty database.', 'warning');
+                    checkReadyToClose();
+                }
+            }, 15000);
+            
+            // Set up listener for database ready event
+            if (window.loadingAPI) {
+                console.log('Setting up database ready listener');
+                window.loadingAPI.onDatabaseReady(handleDatabaseReady);
+                
+                // Also check current status in case we missed the event
+                window.loadingAPI.getDatabaseStatus().then(status => {
+                    console.log('Current database status:', status);
+                    if (status.ready) {
+                        handleDatabaseReady({ 
+                            count: status.caseCount,
+                            error: status.error
+                        });
+                    }
+                }).catch(err => {
+                    console.error('Error getting database status:', err);
+                    databaseError = 'Status check failed: ' + err.message;
+                });
+                
+                // Log app info for debugging
+                try {
+                    const appInfo = window.loadingAPI.getAppInfo();
+                    console.log('App info:', appInfo);
+                } catch (error) {
+                    console.error('Error getting app info:', error);
+                }
+            } else {
+                console.warn('loadingAPI not available, will use fallback timing');
+                // Fallback if API not available - assume database is ready after 8 seconds
+                setTimeout(() => {
+                    databaseReady = true;
+                    databaseVerified = true;
+                    databaseError = 'API not available';
+                    updateDatabaseStatus('Database status unknown - API not available');
+                    showNotification('Warning: Electron API not detected. Some features may not work.', 'warning');
+                    checkReadyToClose();
+                }, 8000);
+            }
+        }
+        
+        // Start loading simulation when page loads
+        window.onload = simulateLoading;
+    </script>
+</body>
+</html> 
